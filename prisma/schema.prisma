@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ListingType {
+  RESIDENTIAL
+  COMMERCIAL
+  BUSINESS
+}
+
+enum ListingStatus {
+  DRAFT
+  PUBLISHED
+  SOLD
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  COMPLETED
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  email        String    @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  role         Role      @default(USER)
+  listings     Listing[]
+  offers       Offer[]
+}
+
+model Listing {
+  id          Int           @id @default(autoincrement())
+  name        String
+  description String
+  price       Float
+  address     String?
+  status      ListingStatus @default(DRAFT)
+  type        ListingType
+  attributes  Json?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  sellerId    Int
+  seller      User          @relation(fields: [sellerId], references: [id])
+  offers      Offer[]
+}
+
+model Offer {
+  id        Int         @id @default(autoincrement())
+  amount    Float
+  status    OfferStatus @default(PENDING)
+  buyerId   Int
+  buyer     User        @relation(fields: [buyerId], references: [id])
+  listingId Int
+  listing   Listing     @relation(fields: [listingId], references: [id])
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
