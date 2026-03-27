@@ -11,7 +11,7 @@ import { ListingService } from './listing.service';
 import { CreateListingDto } from './dto/create-listing.dto';
 import { UpdateListingDto } from './dto/update-listing.dto';
 
-@Controller({ path: 'listing', version: '1' })
+@Controller({ path: 'listings', version: '1' })
 export class ListingController {
   constructor(private readonly listingService: ListingService) {}
 

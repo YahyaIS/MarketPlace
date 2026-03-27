@@ -11,7 +11,7 @@ import { OfferService } from './offer.service';
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { UpdateOfferDto } from './dto/update-offer.dto';
 
-@Controller({ path: 'offer', version: '1' })
+@Controller({ path: 'offers', version: '1' })
 export class OfferController {
   constructor(private readonly offerService: OfferService) {}
 
