@@ -3,7 +3,7 @@ import { ListingsService } from './listings.service';
 import { CreateListingDto } from './dto/create-listing.dto';
 import { UpdateListingDto } from './dto/update-listing.dto';
 
-@Controller('listings')
+@Controller({ path: 'listings', version: '1' })
 export class ListingsController {
   constructor(private readonly listingsService: ListingsService) {}
 

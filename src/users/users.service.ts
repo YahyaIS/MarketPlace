@@ -1,38 +1,39 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) {}
 
-  create(createUserDto: CreateUserDto) {
-    return this.prisma.user.create({
-      data: createUserDto,
-    });
+  async findById(id: number) {
+    return this.prisma.user.findUnique({ where: { id } });
   }
 
-  findAll() {
-    return this.prisma.user.findMany();
+  async findByEmail(email: string) {
+    return this.prisma.user.findUnique({ where: { email } });
   }
 
-  findOne(id: number) {
-    return this.prisma.user.findUnique({
-      where: { id },
-    });
+  async create(data: {
+    email: string;
+    passwordHash: string;
+    firstName: string;
+    lastName: string;
+  }) {
+    return this.prisma.user.create({ data });
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return this.prisma.user.update({
-      where: { id },
-      data: updateUserDto,
-    });
-  }
-
-  remove(id: number) {
-    return this.prisma.user.delete({
-      where: { id },
+  async findAll() {
+    return this.prisma.user.findMany({
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+        // passwordHash and refreshToken excluded
+      },
     });
   }
 }
