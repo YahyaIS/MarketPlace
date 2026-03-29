@@ -4,7 +4,7 @@ import { CreateOfferDto } from './dto/create-offer.dto';
 import { UpdateOfferDto } from './dto/update-offer.dto';
 
 @Injectable()
-export class OfferService {
+export class OffersService {
   constructor(private readonly prisma: PrismaService) {}
 
   create(createOfferDto: CreateOfferDto) {

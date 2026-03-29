@@ -4,7 +4,7 @@ import { CreateListingDto } from './dto/create-listing.dto';
 import { UpdateListingDto } from './dto/update-listing.dto';
 
 @Injectable()
-export class ListingService {
+export class ListingsService {
   constructor(private readonly prisma: PrismaService) {}
 
   create(createListingDto: CreateListingDto) {
