@@ -6,6 +6,16 @@ import * as bcrypt from 'bcrypt';
 export class SessionsService {
   constructor(private prisma: PrismaService) {}
 
+  async findByDevice(deviceId: string | undefined) {
+    if (!deviceId) return null;
+
+    return this.prisma.session.findFirst({
+      where: {
+        deviceId,
+      },
+    });
+  }
+
   async create(data: {
     userId: number;
     refreshToken: string;
@@ -65,11 +75,14 @@ export class SessionsService {
     const hashed = await bcrypt.hash(newRawToken, 10);
     return this.prisma.session.update({
       where: { id: sessionId },
-      data: { refreshToken: hashed, expiresAt },
+      data: {
+        refreshToken: hashed,
+        expiresAt,
+        isRevoked: false,
+      },
     });
   }
 
-  // Revoke a single session (logout from one device)
   async revoke(sessionId: number) {
     return this.prisma.session.update({
       where: { id: sessionId },
@@ -77,7 +90,6 @@ export class SessionsService {
     });
   }
 
-  // Revoke all sessions for a user (logout everywhere)
   async revokeAll(userId: number) {
     return this.prisma.session.updateMany({
       where: { userId, isRevoked: false },

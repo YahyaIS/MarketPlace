@@ -76,12 +76,35 @@ export class AuthService {
   // ─── Helpers ──────────────────────────────────────────────────────────────
   private async createSessionAndTokens(user: any, req: Request) {
     const expiresAt = this.refreshExpiresAt();
+    const deviceId = req.headers['x-device-id'] as string | undefined;
+    const deviceName = this.parseDeviceName(req.headers['user-agent']);
 
-    const session = await this.sessionsService.create({
+    let session = await this.sessionsService.findByDevice(
+      deviceId,
+    );
+
+    if (session) {
+      const tokens = await this.generateTokens(
+        user.id,
+        user.email,
+        user.role,
+        session.id,
+      );
+      await this.sessionsService.rotate(
+        session.id,
+        tokens.refreshToken,
+        expiresAt,
+      );
+
+      const { passwordHash, role, ...safeUser } = user;
+      return { ...tokens, user: safeUser };
+    }
+
+    session = await this.sessionsService.create({
       userId: user.id,
       refreshToken: 'temp',
-      deviceName: this.parseDeviceName(req.headers['user-agent']),
-      deviceId: req.headers['x-device-id'] as string,
+      deviceName,
+      deviceId,
       ipAddress: req.ip,
       userAgent: req.headers['user-agent'],
       expiresAt,
