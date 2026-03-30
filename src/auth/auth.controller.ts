@@ -35,7 +35,7 @@ export class AuthController {
   /** POST /auth/refresh — Authorization: Bearer <refreshToken> */
   @UseGuards(JwtRefreshGuard)
   @HttpCode(HttpStatus.OK)
-  @Post('refresh')
+  @Post('refreshToken')
   refresh(@Request() req) {
     const { id, email, role, sessionId } = req.user;
     return this.authService.refresh(sessionId, id, email, role);
