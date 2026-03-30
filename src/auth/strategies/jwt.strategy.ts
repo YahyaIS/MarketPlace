@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { SessionsService } from '../../sessions/sessions.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor() {
+  constructor(private sessionsService: SessionsService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -13,7 +14,12 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(payload: any) {
-    // sessionId is now included so logout/revoke works from access token too
+    const session = await this.sessionsService.findById(payload.sessionId);
+
+    if (!session || session.isRevoked || session.expiresAt < new Date()) {
+      throw new UnauthorizedException('Session expired or revoked');
+    }
+
     return {
       id: payload.sub,
       email: payload.email,
