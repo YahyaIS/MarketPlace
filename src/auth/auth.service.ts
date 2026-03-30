@@ -99,7 +99,7 @@ export class AuthService {
       expiresAt,
     );
 
-    const { passwordHash, ...safeUser } = user;
+    const { passwordHash, role, ...safeUser } = user;
     return { ...tokens, user: safeUser };
   }
 
