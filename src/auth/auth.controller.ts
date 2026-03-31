@@ -48,11 +48,4 @@ export class AuthController {
   logout(@Request() req) {
     return this.authService.logout(req.user.sessionId);
   }
-
-  /** GET /auth/me — Authorization: Bearer <accessToken> */
-  @UseGuards(JwtAuthGuard)
-  @Get('me')
-  me(@Request() req) {
-    return req.user;
-  }
 }

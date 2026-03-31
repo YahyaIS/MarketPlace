@@ -2,10 +2,11 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { SessionsService } from '../../sessions/sessions.service';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor(private sessionsService: SessionsService) {
+  constructor(private sessionsService: SessionsService, private userService: UsersService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -20,11 +21,14 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       throw new UnauthorizedException('Session expired or revoked');
     }
 
+    const user = await this.userService.findById(session.userId);
+
     return {
       id: payload.sub,
       email: payload.email,
       role: payload.role,
       sessionId: payload.sessionId,
+      ...user,
     };
   }
 }

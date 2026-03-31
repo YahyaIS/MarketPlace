@@ -22,7 +22,7 @@ export class AuthService {
 
   // ─── Called by LocalStrategy ──────────────────────────────────────────────
   async validateUser(email: string, password: string) {
-    const user = await this.usersService.findByEmail(email);
+    const user = await this.usersService.findByEmail(email, true);
     if (!user) throw new UnauthorizedException('Invalid credentials');
 
     const isMatch = await bcrypt.compare(password, user.passwordHash);
