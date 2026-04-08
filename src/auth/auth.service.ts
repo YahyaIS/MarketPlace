@@ -22,7 +22,10 @@ export class AuthService {
 
   // ─── Called by LocalStrategy ──────────────────────────────────────────────
   async validateUser(email: string, password: string) {
-    const user = await this.usersService.findByEmail(email, true);
+    const user = await this.usersService.findOne(
+      { email },
+      { withPassword: true },
+    );
     if (!user) throw new UnauthorizedException('Invalid credentials');
 
     const isMatch = await bcrypt.compare(password, user.passwordHash);
@@ -34,7 +37,7 @@ export class AuthService {
 
   // ─── Public methods ───────────────────────────────────────────────────────
   async register(dto: RegisterDto, req: Request) {
-    const exists = await this.usersService.findByEmail(dto.email);
+    const exists = await this.usersService.findOne({ email: dto.email });
     if (exists) throw new ConflictException('Email already in use');
 
     const passwordHash = await bcrypt.hash(dto.password, 10);
@@ -79,9 +82,7 @@ export class AuthService {
     const deviceId = req.headers['x-device-id'] as string | undefined;
     const deviceName = this.parseDeviceName(req.headers['user-agent']);
 
-    let session = await this.sessionsService.findByDevice(
-      deviceId,
-    );
+    let session = await this.sessionsService.findByDevice(deviceId);
 
     if (session) {
       const tokens = await this.generateTokens(
@@ -135,7 +136,8 @@ export class AuthService {
     const payload = { sub: userId, email, role, sessionId };
 
     const accessExpiry = (process.env.JWT_EXPIRES_IN ?? '15m') as StringValue;
-    const refreshExpiry = (process.env.JWT_REFRESH_EXPIRES_IN ?? '7d') as StringValue;
+    const refreshExpiry = (process.env.JWT_REFRESH_EXPIRES_IN ??
+      '7d') as StringValue;
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {

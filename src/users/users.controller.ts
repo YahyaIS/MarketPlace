@@ -19,7 +19,12 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  me(@Request() req) {
-    return mapUser(req.user);
+  async me(@Request() req) {
+    const user = await this.usersService.findOne(
+      { id: req.user.id },
+      { includeCounts: true },
+    );
+
+    return mapUser(user ?? req.user);
   }
 }

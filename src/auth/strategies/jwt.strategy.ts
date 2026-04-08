@@ -6,7 +6,10 @@ import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor(private sessionsService: SessionsService, private userService: UsersService) {
+  constructor(
+    private sessionsService: SessionsService,
+    private userService: UsersService,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -21,7 +24,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       throw new UnauthorizedException('Session expired or revoked');
     }
 
-    const user = await this.userService.findById(session.userId);
+    const user = await this.userService.findOne({ id: session.userId });
 
     return {
       id: payload.sub,

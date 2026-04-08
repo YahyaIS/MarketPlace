@@ -1,36 +1,50 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from 'src/generated/prisma/client';
+import { UserWhereUniqueInput } from 'src/generated/prisma/models/User';
+
+type FindUserOptions = {
+  includeCounts?: boolean;
+  withPassword?: boolean;
+  withSession?: boolean;
+};
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  private readonly safeSelect = {
-    id: true,
-    email: true,
-    firstName: true,
-    lastName: true,
-    role: true,
-    createdAt: true,
-    updatedAt: true,
-    listings: true,
-    offers: true,
-    sessions: false,
-    passwordHash: false,
-  } satisfies Prisma.UserSelect;
+  private buildSelect(options: FindUserOptions = {}): Prisma.UserSelect {
+    return {
+      id: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+      role: true,
+      createdAt: true,
+      updatedAt: true,
+      passwordHash: options.withPassword ?? false,
+      sessions: options.withSession ?? false,
+      ...(options.includeCounts && {
+        _count: {
+          select: {
+            listings: true,
+            offers: true,
+          },
+        },
+      }),
+    };
+  }
 
-  async findById(id: number, includePassword: boolean = false) {
+  async findOne(query: UserWhereUniqueInput, options: FindUserOptions = {}) {
     return this.prisma.user.findUnique({
-      where: { id },
-      ...(!includePassword && { select: this.safeSelect }),
+      where: query,
+      select: this.buildSelect(options),
     });
   }
 
-  async findByEmail(email: string, includePassword: boolean = false) {
-    return this.prisma.user.findUnique({
-      where: { email },
-      ...(!includePassword && { select: this.safeSelect }),
+  async findAll(options: FindUserOptions = {}) {
+    return this.prisma.user.findMany({
+      select: this.buildSelect(options),
     });
   }
 
@@ -40,21 +54,6 @@ export class UsersService {
     firstName: string;
     lastName: string;
   }) {
-    return this.prisma.user.create({ data });
-  }
-
-  async findAll() {
-    return this.prisma.user.findMany({
-      select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true,
-        // passwordHash and refreshToken excluded
-      },
-    });
+    return this.prisma.user.create({ data, select: this.buildSelect() });
   }
 }
