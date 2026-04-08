@@ -56,4 +56,15 @@ export class UsersService {
   }) {
     return this.prisma.user.create({ data, select: this.buildSelect() });
   }
+
+  async updateProfile(
+    id: number,
+    data: { firstName?: string; lastName?: string },
+  ) {
+    return this.prisma.user.update({
+      where: { id },
+      data,
+      select: this.buildSelect(),
+    });
+  }
 }
