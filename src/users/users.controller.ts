@@ -1,24 +1,20 @@
 import {
   Controller,
   Get,
-  Post,
   Body,
   Patch,
-  Param,
-  Delete,
   Request,
-  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { mapUser } from './user.mapper';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { AuthProtected } from 'src/auth/decorators/auth-protected.decorator';
 
 @Controller({ path: 'users', version: '1' })
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @UseGuards(JwtAuthGuard)
+  @AuthProtected()
   @Get('me')
   async me(@Request() req) {
     const user = await this.usersService.findOne(
@@ -29,7 +25,7 @@ export class UsersController {
     return mapUser(user ?? req.user);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @AuthProtected()
   @Patch('me')
   async updateMe(@Request() req, @Body() dto: UpdateProfileDto) {
     const user = await this.usersService.updateProfile(req.user.id, dto);
