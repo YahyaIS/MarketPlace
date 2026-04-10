@@ -1,4 +1,4 @@
-// src/listings/dto/create-listing.dto.ts
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsString,
   IsNumber,
@@ -11,33 +11,53 @@ import {
 import { ListingStatus, ListingType } from 'src/generated/prisma/client';
 
 export class CreateListingDto {
+  @ApiProperty({
+    example: 'Luxury Beachfront Villa',
+    description: 'The display name of the property',
+  })
   @IsString()
-  @MinLength(3, { message: 'Title must be at least 3 characters' })
+  @MinLength(3)
   name: string;
 
+  @ApiProperty({
+    example:
+      'A stunning 3-bedroom villa with a private pool and sunset views over the Pacific.',
+    description: 'Detailed description (min 15 chars)',
+  })
   @IsString()
-  @MinLength(15, { message: 'Description must be at least 15 characters' })
+  @MinLength(15)
   description: string;
 
-  @IsNumber({}, { message: 'Price must be a number' })
-  @IsPositive({ message: 'Price must be a positive number' })
+  @ApiProperty({ example: 450.0, description: 'Price per night in USD' })
+  @IsNumber()
+  @IsPositive()
   price: number;
 
+  @ApiProperty({ example: '123 Ocean Drive, Miami, FL', required: false })
   @IsOptional()
   @IsString()
   address?: string;
 
-  @IsEnum(ListingType, {
-    message: `Listing type must be one of: ${Object.values(ListingType).join(', ')}`,
+  @ApiProperty({
+    enum: ListingType,
+    example: ListingType.BUSINESS, // Or a specific string value from your enum
   })
+  @IsEnum(ListingType)
   type: ListingType;
 
-  @IsOptional()
-  @IsEnum(ListingStatus, {
-    message: `Listing status must be one of: ${Object.values(ListingStatus).join(', ')}`,
+  @ApiProperty({
+    enum: ListingStatus,
+    example: ListingStatus.PUBLISHED,
+    required: false,
   })
+  @IsOptional()
+  @IsEnum(ListingStatus)
   status?: ListingStatus;
 
+  @ApiProperty({
+    example: { wifi: true, parking: '2 spots', pool: 'private' },
+    required: false,
+  })
   @IsOptional()
   @IsObject()
   attributes?: Record<string, any>;

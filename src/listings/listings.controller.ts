@@ -1,4 +1,3 @@
-// src/listings/listings.controller.ts
 import {
   Controller,
   Get,
@@ -15,14 +14,14 @@ import {
 import { ListingsService } from './listings.service';
 import { CreateListingDto } from './dto/create-listing.dto';
 import { UpdateListingDto } from './dto/update-listing.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AuthProtected } from 'src/auth/decorators/auth-protected.decorator';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 
 @Controller({ path: 'listings', version: '1' })
 export class ListingsController {
   constructor(private readonly listingsService: ListingsService) {}
 
-  @UseGuards(JwtAuthGuard)
+  @AuthProtected()
   @Post()
   @HttpCode(HttpStatus.CREATED)
   create(
@@ -37,7 +36,7 @@ export class ListingsController {
     return this.listingsService.findAll();
   }
 
-  @UseGuards(JwtAuthGuard)
+  @AuthProtected()
   @Get('me')
   findMyListings(@CurrentUser('id') userId: number) {
     return this.listingsService.findAll({ sellerId: userId });
@@ -48,7 +47,7 @@ export class ListingsController {
     return this.listingsService.findOne(id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @AuthProtected()
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
@@ -58,7 +57,7 @@ export class ListingsController {
     return this.listingsService.update(id, userId, updateListingDto);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @AuthProtected()
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   remove(
