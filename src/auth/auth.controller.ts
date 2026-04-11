@@ -19,6 +19,7 @@ import { LoginDto } from './dto/login.dto';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @ApiBody({ type: RegisterDto })
   @Post('register')
   register(@Body() dto: RegisterDto, @Request() req) {
     return this.authService.register(dto, req);
